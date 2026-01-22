@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 // Email Transporter (Use Mailtrap for testing or Gmail for production)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: 'your-email@gmail.com', pass: 'your-app-password' }
+    auth: { user: 'usmanbinkhalidpk@gmail.com', pass: 'lydqvuubgoqnvwwe' }
 });
 
 exports.signup = async (req, res) => {
@@ -39,6 +39,8 @@ exports.signup = async (req, res) => {
     }
 };
 
+
+
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
     try {
@@ -71,6 +73,8 @@ exports.login = async (req, res) => {
     }
 };
 
+
+
 exports.deleteUser = async (req, res) => {
     try {
         await User.findByIdAndDelete(req.params.id);
@@ -79,3 +83,4 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
