@@ -3,11 +3,6 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 
-// Email Transporter (Use Mailtrap for testing or Gmail for production)
-// const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: { user: 'usmanbinkhalidpk@gmail.com', pass: 'lydqvuubgoqnvwwe' }
-// });
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -57,6 +52,35 @@ exports.signup = async (req, res) => {
         res.status(500).json({ error: "Failed to send OTP. Please try again later." });
     }
 };
+
+exports.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ msg: "User with this email does not exist" });
+
+        // Generate a new 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Update user with OTP and 1-hour expiry
+        user.otp = otp;
+        user.otpExpires = Date.now() + 3600000; 
+        await user.save();
+
+        // Send Email
+        await transporter.sendMail({
+            from: '"Your App Name" <usmanbinkhalidpk@gmail.com>',
+            to: email,
+            subject: "Password Reset OTP",
+            text: `Your OTP for resetting your password is: ${otp}. It will expire in 1 hour.`
+        });
+
+        res.json({ msg: "OTP sent to your email" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
@@ -130,6 +154,10 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
+
 
 exports.deleteUser = async (req, res) => {
     try {
