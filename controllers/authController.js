@@ -81,6 +81,10 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
+
+
+
+
 exports.resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
     try {
@@ -98,6 +102,7 @@ exports.resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
 
+    
         // Clear OTP fields so they can't be reused
         user.otp = undefined;
         user.otpExpires = undefined;
@@ -109,6 +114,7 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 
 exports.verifyOtp = async (req, res) => {
