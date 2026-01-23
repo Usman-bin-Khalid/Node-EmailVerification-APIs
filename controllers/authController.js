@@ -4,14 +4,26 @@ const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 
 // Email Transporter (Use Mailtrap for testing or Gmail for production)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: 'usmanbinkhalidpk@gmail.com', pass: 'lydqvuubgoqnvwwe' }
-});
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: { user: 'usmanbinkhalidpk@gmail.com', pass: 'lydqvuubgoqnvwwe' }
+// });
 
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Must be false for port 587
+    auth: {
+        user: 'usmanbinkhalidpk@gmail.com',
+        pass: 'lydqvuubgoqnvwwe' 
+    },
+    tls: {
+        // This prevents the "ETIMEDOUT" or "Self-signed certificate" errors
+        rejectUnauthorized: false 
+    }
+});
 exports.signup = async (req, res) => {
     const { name, email, password, confirmPassword, dob, gender, country } = req.body;
-
     if (password !== confirmPassword) return res.status(400).json({ msg: "Passwords do not match" });
 
     try {
@@ -21,26 +33,30 @@ exports.signup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        user = new User({
+        // 1. Create the user object but DO NOT .save() yet
+        const newUser = new User({
             name, email, password: hashedPassword, dob, gender, country,
-            otp, otpExpires: Date.now() + 3600000 // 1 hour
+            otp, otpExpires: Date.now() + 3600000 
         });
 
-        await user.save();
-
+        // 2. Try to send the email FIRST
         await transporter.sendMail({
+            from: '"Your App Name" <usmanbinkhalidpk@gmail.com>',
             to: email,
             subject: "Verify your account",
             text: `Your OTP is ${otp}`
         });
 
+        // 3. Only if email sends successfully, save the user to the database
+        await newUser.save();
+
         res.status(201).json({ msg: "User registered. Please check your email for OTP." });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        // If email fails, the error is caught here and user is never saved in DB
+        console.error("Mail Error: ", err);
+        res.status(500).json({ error: "Failed to send OTP. Please try again later." });
     }
 };
-
-
 
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
@@ -58,6 +74,10 @@ exports.verifyOtp = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+
+
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
