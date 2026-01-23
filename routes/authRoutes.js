@@ -6,5 +6,7 @@ router.post('/signup', signup);
 router.post('/verify-otp', verifyOtp);
 router.post('/login', login);
 router.delete('/delete/:id', deleteUser);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;
