@@ -81,6 +81,35 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
+exports.resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ 
+            email, 
+            otp, 
+            otpExpires: { $gt: Date.now() } // Check if OTP is not expired
+        });
+
+        if (!user) {
+            return res.status(400).json({ msg: "Invalid OTP or OTP has expired" });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+
+        // Clear OTP fields so they can't be reused
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        
+        await user.save();
+
+        res.json({ msg: "Password reset successful. You can now login with your new password." });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
