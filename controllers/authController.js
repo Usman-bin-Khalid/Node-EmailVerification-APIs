@@ -17,6 +17,11 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false 
     }
 });
+
+exports.signup2 = async (req , res) => {
+    const {name, email, password, confirmPassword, dob, gender, country} = req.body;
+}
+
 exports.signup = async (req, res) => {
     const { name, email, password, confirmPassword, dob, gender, country } = req.body;
     if (password !== confirmPassword) return res.status(400).json({ msg: "Passwords do not match" });
@@ -53,6 +58,8 @@ exports.signup = async (req, res) => {
     }
 };
 
+
+
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
@@ -80,8 +87,6 @@ exports.forgotPassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 
 
 
@@ -114,6 +119,7 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 
 
