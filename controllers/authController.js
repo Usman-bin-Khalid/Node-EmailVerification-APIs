@@ -119,6 +119,7 @@ exports.resetPassword = async (req, res) => {
 
 
 
+
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
     try {
