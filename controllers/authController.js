@@ -18,9 +18,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-exports.signup2 = async (req , res) => {
-    const {name, email, password, confirmPassword, dob, gender, country} = req.body;
-}
+
 
 exports.signup = async (req, res) => {
     const { name, email, password, confirmPassword, dob, gender, country } = req.body;
@@ -87,8 +85,6 @@ exports.forgotPassword = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 
 exports.resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
